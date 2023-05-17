@@ -1,14 +1,11 @@
 import streamlit as st
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
-from streamlit.hashing import _CodeHasher
-from streamlit.report_thread import REPORT_CONTEXT_ATTR_NAME
-from streamlit.server.server import Server
+from .password_hasher import generate_hashed_pass , verify_hashed_pass
 from streamlit import session_state
 import os
-from streamlit_echarts import st_echarts
 from dotenv import load_dotenv
-
+from streamlit_extras.switch_page_button import switch_page
 load_dotenv()
 
 AWS_REGION = os.getenv('AWS_REGION')
@@ -16,14 +13,15 @@ AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 DYNAMODB_ENDPOINT = os.getenv('DYNAMODB_ENDPOINT')
 
-@st.cache_resource(allow_output_mutation=True)
+@st.cache_resource()
 def get_resource():
     dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION, aws_access_key_id=AWS_ACCESS_KEY_ID,
-                              aws_secret_access_key=AWS_SECRET_ACCESS_KEY, endpoint_url=DYNAMODB_ENDPOINT)
+                              aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
     table = dynamodb.Table('users')
     return table
 
 table = get_resource()
+
 
 def signup():
     st.title('Signup')
@@ -32,7 +30,7 @@ def signup():
     email = st.text_input('Email')
     if st.button('Sign up'):
         if username and password and email:
-            response = table.put_item(Item={'username': username, 'password': _CodeHasher().hash(password),
+            response = table.put_item(Item={'username': username, 'password': password,
                                              'email': email})
             if response:
                 st.success('Successfully signed up! Please login.')
@@ -63,7 +61,7 @@ def login():
         if username and password:
             response = table.scan(FilterExpression=Attr('username').eq(username))
             if response['Items']:
-                if _CodeHasher().verify(password, response['Items'][0]['password']):
+                if password == response['Items'][0]['password']:
                     session_state.username = username
                     st.experimental_set_query_params(username=session_state.username)
                 else:
@@ -85,6 +83,7 @@ def main():
         login()
         if 'username' in session_state:
             # switch_page(Server.get_current()._session_info.session.request, '/auth/home')
+            switch_page('page1')
             pass
     elif page == 'Signup':
         signup()
