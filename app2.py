@@ -1,143 +1,91 @@
-import re
 import streamlit as st
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
-
+from .password_hasher import generate_hashed_pass , verify_hashed_pass
+from streamlit import session_state
 import os
 from dotenv import load_dotenv
-load_dotenv('.env')
-YOUR_ACCESS_KEY = os.getenv('aws_access_key_id')
-YOUR_SECRET_KEY = os.getenv('aws_secret_access_key')
+from streamlit_extras.switch_page_button import switch_page
+load_dotenv()
 
-# Function to validate email address
-def is_valid_email(email):
-    email_regex = r"[^@]+@[^@]+\.[^@]+"
-    return re.match(email_regex, email)
+AWS_REGION = os.getenv('AWS_REGION')
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+DYNAMODB_ENDPOINT = os.getenv('DYNAMODB_ENDPOINT')
 
-# Function to validate password
-def is_valid_password(password):
-    return len(password) >= 8
+@st.cache_resource()
+def get_resource():
+    dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION, aws_access_key_id=AWS_ACCESS_KEY_ID,
+                              aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+    table = dynamodb.Table('users')
+    return table
 
-# Function to handle user sign up
+table = get_resource()
+
+
 def signup():
-    # Get user input
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    email = st.text_input("Email")
-    
-    # Validate email and password
-    if not is_valid_email(email):
-        st.error("Please enter a valid email address")
-        return
-    
-    if not is_valid_password(password):
-        st.error("Password must be at least 8 characters long")
-        return
-    
-    # Add user to DynamoDB table
-    table.put_item(
-        Item={
-            "username": username,
-            "password": password,
-            "email": email
-        }
-    )
-    st.success("You have successfully signed up! Please log in.")
+    st.title('Signup')
+    username = st.text_input('Username')
+    password = st.text_input('Password', type='password')
+    email = st.text_input('Email')
+    if st.button('Sign up'):
+        if username and password and email:
+            response = table.put_item(Item={'username': username, 'password': password,
+                                             'email': email})
+            if response:
+                st.success('Successfully signed up! Please login.')
+                st.experimental_rerun()
+        else:
+            st.warning('Please fill all the fields.')
 
-# Function to handle user login
-def login():
-    # Get user input
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    
-    # Retrieve user from DynamoDB table
-    response = table.query(
-        KeyConditionExpression=Key("username").eq(username)
-    )
-    
-    # Check if user exists and password is correct
-    if response["Count"] == 0:
-        st.error("Username not found")
-        return
-    
-    user = response["Items"][0]
-    if user["password"] != password:
-        st.error("Incorrect password")
-        return
-    
-    # Set authentication status to True and display username in sidebar
-    st.sidebar.success("Logged in as {}".format(username))
-    st.session_state.authenticated = True
-    st.session_state.username = username
-
-# Function to handle user logout
-def logout():
-    # Set authentication status to False and username to None
-    st.session_state.authenticated = False
-    st.session_state.username = None
-
-# Function to handle forgot username
-def forgot_username():
-    # Get user input
-    email = st.text_input("Email")
-    
-    # Retrieve user from DynamoDB table
-    response = table.scan(
-        FilterExpression=Attr("email").eq(email)
-    )
-    
-    # Check if user exists and display username
-    if response["Count"] > 0:
-        username = response["Items"][0]["username"]
-        st.success("Your username is {}".format(username))
-    else:
-        st.error("Email not found")
-
-# Function to handle forgot password
 def forgot_password():
-    # Get user input
-    username = st.text_input("Username")
-    email = st.text_input("Email")
-    
-    # Retrieve user from DynamoDB table
-    response = table.query(
-        KeyConditionExpression=Key("username").eq(username)
-    )
-    
-    # Check if user exists and send password reset email
-    if response["Count"] > 0 and response["Items"][0]["email"] == email:
-        # send_password_reset_email(email)
-        # st.success("Password reset email sent")
-        st.success("Password reset email sent")
-    else:
-        st.error("Username or email not found")
+    st.title('Forgot Password')
+    username = st.text_input('Username')
+    email = st.text_input('Email')
+    if st.button('Send password reset link'):
+        if username and email:
+            response = table.scan(FilterExpression=Attr('username').eq(username) & Attr('email').eq(email))
+            if response['Items']:
+                st.success('A password reset link has been sent to your email.')
+                st.experimental_rerun()
+            else:
+                st.warning('Invalid username or email.')
+        else:
+            st.warning('Please fill all the fields.')
 
+def login():
+    st.title('Login')
+    username = st.text_input('Username')
+    password = st.text_input('Password', type='password')
+    if st.button('Login'):
+        if username and password:
+            response = table.scan(FilterExpression=Attr('username').eq(username))
+            if response['Items']:
+                if password == response['Items'][0]['password']:
+                    session_state.username = username
+                    st.experimental_set_query_params(username=session_state.username)
+                else:
+                    st.warning('Incorrect password.')
+            else:
+                st.warning('Username does not exist.')
+
+def logout():
+    del session_state.username
+    st.experimental_set_query_params()
 
 def main():
-    # Create DynamoDB resource
-    dynamodb_resource = boto3.resource("dynamodb")
-    global table
-    table = dynamodb_resource.Table("users")
-    
-    # Create Streamlit app
-    st.title("Login/Sign up App")
-    st.session_state.authenticated = False
-    st.session_state.username = None
-    
-    # Create tabs
-    tabs = ["Login", "Sign up", "Forgot Username", "Forgot Password"]
-    selected_tab = st.sidebar.selectbox("Select an action", tabs)
-    
-    # Call appropriate function based on selected tab
-    if selected_tab == "Login":
+    st.set_page_config(page_title='Login/Signup')
+
+    tabs = ['Login', 'Signup', 'Forgot Password']
+    page = st.sidebar.radio('Select a page', tabs)
+
+    if page == 'Login':
         login()
-    elif selected_tab == "Sign up":
+        if 'username' in session_state:
+            # switch_page(Server.get_current()._session_info.session.request, '/auth/home')
+            switch_page('page1')
+            pass
+    elif page == 'Signup':
         signup()
-    elif selected_tab == "Forgot Username":
-        forgot_username()
-    elif selected_tab == "Forgot Password":
+    elif page == 'Forgot Password':
         forgot_password()
-    
-    # Display logout button if user is authenticated
-    if st.session_state.authenticated:
-        st.sidebar.button("Logout", on_click=logout)

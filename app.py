@@ -2,43 +2,47 @@ import streamlit as st
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 from streamlit_extras.switch_page_button import switch_page
-
-import os
-from dotenv import load_dotenv
-load_dotenv('.env')
-YOUR_ACCESS_KEY = os.getenv('aws_access_key_id')
-YOUR_SECRET_KEY = os.getenv('aws_secret_access_key')
-
-@st.cache_resource
-def get_resourse():
-    dynamodb = boto3.resource(
-        'dynamodb',
-        aws_access_key_id=YOUR_ACCESS_KEY,
-        aws_secret_access_key=YOUR_SECRET_KEY,
-        region_name='eu-west-2' # replace with your preferred region
-    )
-    return dynamodb
+from password_hasher import generate_hashed_pass , verify_hashed_pass
+from validate import validate_username , validate_email
+from database import get_resourse,get_table
 
 dynamodb = get_resourse()
+table = get_table('users',dynamodb)
 
-table = dynamodb.Table('users')
 
+def is_valid_username(username):
+    response = table.scan(FilterExpression=Attr('username').eq(username))
+    return len(response['Items']) == 0
 def signup():
     # st.session_state['authenticated'] = False
     username = st.text_input("Username",key='signup_username')
     password = st.text_input("Password", type="password",key='signup_password')
     email = st.text_input("Email",key='signup_email')
     if st.button("Sign up"):
-        response = table.put_item(
-            Item={
-                'username': username,
-                'password': password,
-                'email': email
-            }
-        )
-        if response.get('ResponseMetadata')['HTTPStatusCode'] == 200:
-            st.success("You have successfully signed up.")
-            st.info("Please log in to your account.")
+        if not username or not password or not email:
+            st.warning('Please fill all the fields.')
+            return
+        if ' ' in username:
+            st.warning('Username must not contain any spaces.')
+            return
+        if not validate_username(username):
+            st.warning('Username must contain only alphanumeric characters or underscores.')
+            return
+        if not validate_email(email):
+            st.warning('Invalid email address.')
+            return
+        if not is_valid_username(username):
+            st.warning('Username already exists.')
+            return
+        hashed_pass = generate_hashed_pass(password)
+        print(hashed_pass , password)
+        response = table.put_item(Item={'username': username,
+                                        'password': hashed_pass,
+                                        'email': email})
+        if response:
+            st.success('Successfully signed up! Please login.')
+            st.experimental_rerun()
+
 
 
 def login():
@@ -49,9 +53,10 @@ def login():
             KeyConditionExpression=Key('username').eq(username)
         )
         items = response['Items']
-        print(items)
+        print(items[0]['password'])
+        print(password)
         if items:
-            if items[0]['password'] == password:
+            if verify_hashed_pass(items[0]['password'],password):
                 st.success("You have successfully logged in.")
                 st.session_state['username'] = username
                 st.session_state['authenticated'] = True
