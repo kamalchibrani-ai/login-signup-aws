@@ -5,7 +5,7 @@ from streamlit_extras.switch_page_button import switch_page
 from password_hasher import generate_hashed_pass , verify_hashed_pass
 from validate import validate_username , validate_email
 from database import get_resourse,get_table
-
+import time as T
 dynamodb = get_resourse()
 table = get_table('users',dynamodb)
 
@@ -48,7 +48,11 @@ def signup():
 def login():
     username = st.text_input("Username",key='login_username')
     password = st.text_input("Password", type="password",key='login_password')
+
     if st.button("Login"):
+        if not username or not password:
+            st.warning('Please fill all the fields.')
+            return
         response = table.query(
             KeyConditionExpression=Key('username').eq(username)
         )
@@ -60,11 +64,9 @@ def login():
                 st.success("You have successfully logged in.")
                 st.session_state['username'] = username
                 st.session_state['authenticated'] = True
-                with st.sidebar:
-                    # username = st.session_state['username']
-                    st.write(f"Hello {username}")
-                    logout()
-                    switch_page('page1')
+                st.balloons()
+                T.sleep(1.25)
+                switch_page('page1')
 
             else:
                 st.error("Incorrect password.")
@@ -79,7 +81,7 @@ def logout():
 
 
 def main():
-    st.title("Login/Sign up App")
+    # st.title("Login/Sign up App")
     tab1 , tab2 = st.tabs(['Login', 'Sign up'])
     with tab1:
         login()

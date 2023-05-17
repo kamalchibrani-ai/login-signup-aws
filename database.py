@@ -17,6 +17,7 @@ def get_resourse():
     return dynamodb
 
 
+
 def get_table(table_name,dynamodb):
     table = dynamodb.Table(table_name)
     return table

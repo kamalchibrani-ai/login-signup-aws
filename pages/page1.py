@@ -1,11 +1,9 @@
 import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
+from utils import logout_button_sidebar,switch_page_if_auth_isFalse
 
-if st.session_state['authenticated'] == False:
-    switch_page('app')
+switch_page_if_auth_isFalse()
+logout_button_sidebar()
 
-with st.sidebar:
-    if st.button('logout'):
-        st.session_state['authenticated'] = False
-        switch_page('app')
+
 
