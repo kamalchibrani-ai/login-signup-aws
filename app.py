@@ -65,8 +65,21 @@ def login():
                 st.session_state['username'] = username
                 st.session_state['authenticated'] = True
                 st.balloons()
-                T.sleep(1.25)
-                switch_page('page1')
+                T.sleep(1.5)
+                st.progress(1)
+                table_profile = get_table('user_profile',dynamodb)
+                print(table_profile)
+                response_profile = table_profile.query(
+                    KeyConditionExpression=Key('username').eq(username)
+                )
+                print(len(response_profile['Items']))
+                if len(response_profile['Items'])>0:
+                    st.session_state['user_profile'] = False
+                    switch_page('page1')
+                else:
+                    st.session_state['user_profile'] = True
+                    switch_page('user_profile')
+
 
             else:
                 st.error("Incorrect password.")
@@ -82,6 +95,7 @@ def logout():
 
 def main():
     # st.title("Login/Sign up App")
+    st.header('Login / Sign Up')
     tab1 , tab2 = st.tabs(['Login', 'Sign up'])
     with tab1:
         login()
@@ -90,7 +104,6 @@ def main():
 
 if __name__ == '__main__':
     main()
-
 
 
 

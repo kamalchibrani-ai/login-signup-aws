@@ -9,6 +9,10 @@ def switch_page_if_auth_isFalse():
     if st.session_state['authenticated'] == False:
         switch_page('app')
 
+def switch_page_if_userProfile_isFalse():
+    if st.session_state['user_profile'] == False:
+        switch_page('page1')
+
 def logout_button_sidebar():
     with st.sidebar:
         if st.button('logout'):
@@ -16,4 +20,5 @@ def logout_button_sidebar():
             switch_page('app')
 
 def things_with_sidebar(username):
-    st.title = 'welcome' + username
+    with st.sidebar:
+        st.subheader('Welcome ' + username)

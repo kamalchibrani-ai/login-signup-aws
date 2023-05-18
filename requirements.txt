@@ -3,3 +3,6 @@ boto3
 streamlit-extras
 python-dotenv
 argon2-cffi
+langchain
+openai
+tabulate

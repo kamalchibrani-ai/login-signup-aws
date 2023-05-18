@@ -1,31 +1,28 @@
 import streamlit as st
+from streamlit_extras.switch_page_button import switch_page
 from dotenv import load_dotenv
 import os
 import boto3
-from database import get_resourse,get_table
+from database import get_resourse,get_table,fetch_data_from_dynamodb,fetch_data
 load_dotenv('.env')
 from utils import switch_page_if_auth_isFalse,logout_button_sidebar,things_with_sidebar
 from decimal import Decimal
 
+
+if st.session_state['user_profile'] == False:
+    switch_page('page1')
+
+
 switch_page_if_auth_isFalse()
 logout_button_sidebar()
-things_with_sidebar(st.session_state['username'])
 
 
-
+st.header('Welcome '+ st.session_state['username'])
 
 dynamodb = get_resourse()
-table = get_table('user_profile',dynamodb)
+table = get_table('user_profile', dynamodb)
 
-print(table)
 
-# AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-# AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-# AWS_REGION = os.getenv('AWS_REGION')
-
-# dynamodb = boto3.resource('dynamodb', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY, region_name=AWS_REGION)
-# table_name = 'user_profiles'
-# table = dynamodb.Table(table_name)
 
 def get_marks():
     marks_10th = Decimal(str(st.number_input('Enter your 10th marks in percentage', min_value=0.0, max_value=100.0, step=0.1, key='marks_10th')))
@@ -89,18 +86,6 @@ marks_10th, marks_12th = get_marks()
 degree_type, bachelors = get_degree_type()
 test_scores = get_test_scores()
 country, field = get_country_and_field()
-
-# Display user input
-# st.write('Your 10th marks:', marks_10th)
-# st.write('Your 12th marks:', marks_12th)
-# st.write('Degree type:', degree_type)
-# if bachelors:
-#     st.write('Your Bachelor marks:', bachelors)
-# for t, s in test_scores.items():
-#     st.write(f'{t} score:', s)
-# st.write('Desired country/countries:', country)
-# st.write('Field of study:', field)
-print(st.session_state['username'])
 
 # Save user input
 if st.button('Save'):
