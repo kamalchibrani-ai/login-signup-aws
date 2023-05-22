@@ -1,8 +1,7 @@
-streamlit
-boto3
+streamlit~=1.22.0
+boto3~=1.26.135
 streamlit-extras
-python-dotenv
+python-dotenv~=1.0.0
 argon2-cffi
-langchain
 openai
-tabulate
+streamlit-chat

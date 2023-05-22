@@ -57,8 +57,6 @@ def login():
             KeyConditionExpression=Key('username').eq(username)
         )
         items = response['Items']
-        print(items[0]['password'])
-        print(password)
         if items:
             if verify_hashed_pass(items[0]['password'],password):
                 st.success("You have successfully logged in.")
@@ -68,19 +66,16 @@ def login():
                 T.sleep(1.5)
                 st.progress(1)
                 table_profile = get_table('user_profile',dynamodb)
-                print(table_profile)
                 response_profile = table_profile.query(
                     KeyConditionExpression=Key('username').eq(username)
                 )
                 print(len(response_profile['Items']))
                 if len(response_profile['Items'])>0:
                     st.session_state['user_profile'] = False
-                    switch_page('page1')
+                    switch_page('Profile')
                 else:
                     st.session_state['user_profile'] = True
-                    switch_page('user_profile')
-
-
+                    switch_page('Form')
             else:
                 st.error("Incorrect password.")
         else:
