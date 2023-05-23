@@ -34,7 +34,7 @@ if st.session_state.query is not None:
         completion = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=prompt,
-            temperature=0.7,
+            temperature=0.5,
         )
     st.session_state.query = None
 
