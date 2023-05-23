@@ -9,7 +9,7 @@ from utils import switch_page_if_auth_isFalse,logout_button_sidebar,things_with_
 from decimal import Decimal
 
 
-if st.session_state['user_profile'] == False:
+if st.session_state['user_profile'] == True:
     switch_page('Profile')
 
 
@@ -88,7 +88,7 @@ test_scores = get_test_scores()
 country, field = get_country_and_field()
 
 # Save user input
-if st.button('Start Conversation',type='primary'):
+if st.button('Submit',type='primary'):
     user_data = {
         'username': st.session_state['username'],  # Replace with the actual username
         'marks_10th': marks_10th,
@@ -103,8 +103,8 @@ if st.button('Start Conversation',type='primary'):
     try:
         table.put_item(Item=user_data)
         print("Successfully inserted user input into the database")
+        st.session_state.user_profile = True
         switch_page('Profile')
-        st.session_state.user_profile = False
     except Exception as e:
         print("Error inserting user input into the database")
         print(e)

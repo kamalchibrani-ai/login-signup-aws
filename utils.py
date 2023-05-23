@@ -11,7 +11,7 @@ def switch_page_if_auth_isFalse():
 
 def switch_page_if_userProfile_isFalse():
     if st.session_state['user_profile'] == False:
-        switch_page('page1')
+        switch_page('Profile')
 
 def logout_button_sidebar():
     with st.sidebar:

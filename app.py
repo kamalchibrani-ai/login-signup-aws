@@ -71,10 +71,10 @@ def login():
                 )
                 print(len(response_profile['Items']))
                 if len(response_profile['Items'])>0:
-                    st.session_state['user_profile'] = False
+                    st.session_state['user_profile'] = True
                     switch_page('Profile')
                 else:
-                    st.session_state['user_profile'] = True
+                    st.session_state['user_profile'] = False
                     switch_page('Form')
             else:
                 st.error("Incorrect password.")
