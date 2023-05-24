@@ -84,19 +84,18 @@ if st.session_state['authenticated']:
     st.write("Result:", result)
     st.session_state.result = None
     if result is not None:
-        st.session_state['result'] = result
-        number_of_values , value = fetch_keys_values(formatted_data)
-        for key,value in value.items():
-            query = f'''Hi there! I am {formatted_data['username']}, I am looking to study in {formatted_data['country']},
-            my {key} marks is {value},
-            I want to do {formatted_data['degree_type']} in {formatted_data['field']}.
-            Can you provide me with {result} of each country according to my qualifications?
-            Please provide a personalized response based on my qualifications.
-            Let's think step by step.'''
-
-        st.session_state['query'] = query
-
         if st.button('Start Conversation'):
+            st.session_state['result'] = result
+            number_of_values, value = fetch_keys_values(formatted_data)
+            for key, value in value.items():
+                query = f'''Hi there! I am {formatted_data['username']}, I am looking to study in {formatted_data['country']},
+                        my {key} marks is {value},
+                        I want to do {formatted_data['degree_type']} in {formatted_data['field']}.
+                        Can you provide me with {result} of each country according to my qualifications?
+                        Please provide a personalized response based on my qualifications.
+                        Let's think step by step.'''
+
+            st.session_state['query'] = query
             switch_page('CourseBot')
 
 

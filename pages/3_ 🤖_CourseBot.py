@@ -53,6 +53,7 @@ except Exception as e:
     
 
 message_history = st.session_state.message_history
+print(message_history)
 user_input = st.text_input('please insert a question')
 
 if len(user_input)>0:
