@@ -80,6 +80,7 @@ if st.session_state['authenticated']:
                         ]
                        )
     st.write("Result:", result)
+    st.session_state.result = None
     if result is not None:
         st.session_state['result'] = result
         number_of_values , value = fetch_keys_values(formatted_data)

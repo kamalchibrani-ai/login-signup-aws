@@ -11,8 +11,10 @@ from streamlit_chat import message
 import openai
 import os
 from dotenv import load_dotenv
-from utils import logout_button_sidebar,switch_page_if_auth_isFalse
+from utils import logout_button_sidebar,switch_page_if_auth_isFalse,EmailUs
 from streamlit_extras.switch_page_button import switch_page
+import webbrowser
+
 
 load_dotenv()
 
@@ -20,6 +22,10 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 
 logout_button_sidebar()
 switch_page_if_auth_isFalse()
+EmailUs()
+print(st.session_state.result)
+if st.session_state.result == None:
+    switch_page('Profile')
 
 try:
     if st.session_state.query is not None:
@@ -65,6 +71,8 @@ if message_history is not None:
         print(message_history[i])
         message(message_history[i]['content'],key=str(i))
         message(message_history[i-1]['content'],is_user=True, key=str(i-1))
+
+
 
 
 
