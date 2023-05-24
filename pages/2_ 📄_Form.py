@@ -5,11 +5,12 @@ import os
 import boto3
 from database import get_resourse,get_table,fetch_data_from_dynamodb,fetch_data
 load_dotenv('.env')
-from utils import switch_page_if_auth_isFalse,logout_button_sidebar,things_with_sidebar
+from utils import switch_page_if_auth_isFalse,logout_button_sidebar,things_with_sidebar,EmailUs
 from decimal import Decimal
 
 switch_page_if_auth_isFalse()
 logout_button_sidebar()
+EmailUs()
 
 
 if st.session_state['user_profile'] == True:

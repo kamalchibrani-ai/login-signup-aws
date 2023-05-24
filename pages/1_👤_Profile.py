@@ -3,13 +3,14 @@ from streamlit_extras.switch_page_button import switch_page
 from streamlit_extras.colored_header import colored_header
 from streamlit_extras.no_default_selectbox import selectbox
 
-from utils import logout_button_sidebar,switch_page_if_auth_isFalse
+from utils import logout_button_sidebar,switch_page_if_auth_isFalse,EmailUs
 from database import fetch_data,get_table,get_resourse
 from decimal import Decimal
 
 
 switch_page_if_auth_isFalse()
 logout_button_sidebar()
+EmailUs()
 
 if st.session_state['user_profile'] == False:
     switch_page('Form')
