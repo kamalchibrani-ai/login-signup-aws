@@ -45,7 +45,7 @@ try:
                 messages=prompt,
                 temperature=0.5,
             )
-        last_generated_content = completion.choices[0].message['content']
+        st.session_state.message_history.append({"role": "assistant", "content": f"{completion.choices[0].message['content']}"})
         st.session_state.query = None
 except Exception as e:
     switch_page('Profile')
@@ -55,8 +55,10 @@ except Exception as e:
 message_history = st.session_state.message_history
 print(message_history)
 user_input = st.text_input('please insert a question')
-
+user_input = user_input.lstrip()
+print(user_input)
 if len(user_input)>0:
+    print('inside user input',message_history)
     message_history.append({"role": "user", "content": f"{user_input}"})
     with st.spinner('generating...'):
         completion = openai.ChatCompletion.create(
@@ -65,9 +67,13 @@ if len(user_input)>0:
             temperature=0.7,
         )
     last_generated_content = completion.choices[0].message['content']
-message_history.append({"role": "assistant", "content": f"{last_generated_content}"})
+    message_history.append({"role": "assistant", "content": f"{last_generated_content}"})
 
-if message_history is not None:
+print('message history after user input',message_history)
+
+print(len(message_history))
+
+if len(message_history)>0:
     for i in range(len(message_history)-1, 1, -2):
         print(message_history[i])
         message(message_history[i]['content'],key=str(i))
