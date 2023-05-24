@@ -8,13 +8,15 @@ load_dotenv('.env')
 from utils import switch_page_if_auth_isFalse,logout_button_sidebar,things_with_sidebar
 from decimal import Decimal
 
+switch_page_if_auth_isFalse()
+logout_button_sidebar()
+
 
 if st.session_state['user_profile'] == True:
     switch_page('Profile')
 
 
-switch_page_if_auth_isFalse()
-logout_button_sidebar()
+
 
 
 st.header('Welcome '+ st.session_state['username'])

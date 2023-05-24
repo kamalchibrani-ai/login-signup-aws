@@ -9,6 +9,7 @@ import time as T
 dynamodb = get_resourse()
 table = get_table('users',dynamodb)
 
+st.session_state['authenticated'] = False
 
 def is_valid_username(username):
     response = table.scan(FilterExpression=Attr('username').eq(username))

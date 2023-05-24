@@ -7,11 +7,14 @@ from utils import logout_button_sidebar,switch_page_if_auth_isFalse
 from database import fetch_data,get_table,get_resourse
 from decimal import Decimal
 
-if st.session_state['user_profile'] == False:
-    switch_page('Form')
 
 switch_page_if_auth_isFalse()
 logout_button_sidebar()
+
+if st.session_state['user_profile'] == False:
+    switch_page('Form')
+
+
 
 dynamodb = get_resourse()
 table = get_table('user_profile',dynamodb)

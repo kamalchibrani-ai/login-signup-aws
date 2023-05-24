@@ -11,32 +11,40 @@ from streamlit_chat import message
 import openai
 import os
 from dotenv import load_dotenv
-from utils import logout_button_sidebar
+from utils import logout_button_sidebar,switch_page_if_auth_isFalse
+from streamlit_extras.switch_page_button import switch_page
 
 load_dotenv()
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 logout_button_sidebar()
+switch_page_if_auth_isFalse()
 
-if st.session_state.query is not None:
-    prompt = [
-            {
-                'role': 'assistant','content': 'I am an academic consultant and i will do the following and only provide crisp information about the asked query and take content into context'
-            },
-            {
-                "role": "user","content": f'{st.session_state.query}'
-            },
-    ]
-    st.session_state['message_history'] = prompt
-
-    with st.spinner('generating...'):
-        completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=prompt,
-            temperature=0.5,
-        )
-    st.session_state.query = None
+try:
+    if st.session_state.query is not None:
+        prompt = [
+                {
+                    'role': 'assistant','content': 'I am an academic consultant and i will do the following and only provide crisp information about the asked query and take content into context'
+                },
+                {
+                    "role": "user","content": f'{st.session_state.query}'
+                },
+        ]
+        st.session_state['message_history'] = prompt
+        print(st.session_state.message_history)
+        with st.spinner('generating...'):
+            completion = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=prompt,
+                temperature=0.5,
+            )
+        last_generated_content = completion.choices[0].message['content']
+        st.session_state.query = None
+except Exception as e:
+    switch_page('Profile')
+    print(e)
+    
 
 message_history = st.session_state.message_history
 user_input = st.text_input('please insert a question')
@@ -49,7 +57,7 @@ if len(user_input)>0:
             messages=message_history,
             temperature=0.7,
         )
-last_generated_content = completion.choices[0].message['content']
+    last_generated_content = completion.choices[0].message['content']
 message_history.append({"role": "assistant", "content": f"{last_generated_content}"})
 
 if message_history is not None:
