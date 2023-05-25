@@ -13,8 +13,8 @@ import os
 from dotenv import load_dotenv
 from utils import logout_button_sidebar,switch_page_if_auth_isFalse,EmailUs
 from streamlit_extras.switch_page_button import switch_page
-
-
+import time as T
+import datetime
 load_dotenv()
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
@@ -71,18 +71,13 @@ if len(user_input)>0:
 
 print('message history after user input',message_history)
 
-print(len(message_history))
 
 if len(message_history)>0:
     for i in range(len(message_history)-1, 1, -2):
-        print(message_history[i])
         message(message_history[i]['content'],key=str(i))
         message(message_history[i-1]['content'],is_user=True, key=str(i-1))
 
-
-
-
-
+    save_chat = st.download_button('save_chat',str(message_history),file_name=f'{st.session_state.username}_{datetime.datetime.now().date()}_chat_history.txt')
 
 
 
