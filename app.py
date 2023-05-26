@@ -69,7 +69,7 @@ def login():
                 table_profile = get_table('user_profile',dynamodb)
                 # get_ip()
                 location_data = get_location()
-                print(location_data)
+                st.session_state.location = location_data
                 response_profile = table_profile.query(
                     KeyConditionExpression=Key('username').eq(username)
                 )
