@@ -79,6 +79,3 @@ if len(message_history)>0:
 
     save_chat = st.download_button('save_chat',str(message_history),file_name=f'{st.session_state.username}_{datetime.datetime.now().date()}_chat_history.txt')
 
-
-
-
