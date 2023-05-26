@@ -1,7 +1,10 @@
 streamlit~=1.22.0
 boto3~=1.26.135
 streamlit-extras
-python-dotenv
+python-dotenv~=1.0.0
 argon2-cffi
-openai
+openai~=0.27.6
 streamlit-chat
+
+langchain~=0.0.173
+requests~=2.31.0
