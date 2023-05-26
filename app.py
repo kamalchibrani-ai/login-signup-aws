@@ -5,7 +5,6 @@ from streamlit_extras.switch_page_button import switch_page
 from password_hasher import generate_hashed_pass , verify_hashed_pass
 from validate import validate_username , validate_email
 from database import get_resourse,get_table
-from get_user_location import get_ip,get_location
 import time as T
 dynamodb = get_resourse()
 table = get_table('users',dynamodb)
@@ -68,8 +67,6 @@ def login():
                 T.sleep(1.5)
                 table_profile = get_table('user_profile',dynamodb)
                 # get_ip()
-                location_data = get_location()
-                st.session_state.location = location_data
                 response_profile = table_profile.query(
                     KeyConditionExpression=Key('username').eq(username)
                 )

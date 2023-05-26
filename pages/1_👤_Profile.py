@@ -12,7 +12,6 @@ switch_page_if_auth_isFalse()
 logout_button_sidebar()
 EmailUs()
 
-st.write(st.session_state.location)
 
 if st.session_state['user_profile'] == False:
     switch_page('Form')
